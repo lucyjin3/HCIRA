@@ -1,11 +1,11 @@
 #include "wx/wx.h"
 #include "wx/sizer.h"
 
-class BasicDrawPane : public wxPanel
+class DrawPanel : public wxPanel
 {
     
 public:
-    BasicDrawPane(wxFrame* parent);
+    DrawPanel(wxFrame* parent);
     
     void mouseMoved(wxMouseEvent& event);
     void mouseDown(wxMouseEvent& event);
@@ -21,7 +21,7 @@ class myFrame : public wxFrame
 {
 public:
     myFrame();
-    BasicDrawPane * drawPane;
+    DrawPanel * drawPane;
     void OnReset(wxCommandEvent& event);
 };
 enum
@@ -55,7 +55,7 @@ myFrame::myFrame() : wxFrame((wxFrame *)NULL, -1,  wxT("Project 1 Canvas"), wxPo
      SetMenuBar(menuBar);
 
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-    drawPane = new BasicDrawPane(this);
+    drawPane = new DrawPanel(this);
     sizer->Add(drawPane, 1, wxEXPAND);
 	
     SetSizer(sizer);
@@ -67,19 +67,19 @@ void myFrame::OnReset(wxCommandEvent &event)
 {
     Refresh();
 }
-BEGIN_EVENT_TABLE(BasicDrawPane, wxPanel)
+BEGIN_EVENT_TABLE(DrawPanel, wxPanel)
 
-EVT_LEFT_DOWN(BasicDrawPane::mouseDown)
-EVT_MOTION(BasicDrawPane::mouseMoved)
-EVT_RIGHT_DOWN(BasicDrawPane::rightClick)
+EVT_LEFT_DOWN(DrawPanel::mouseDown)
+EVT_MOTION(DrawPanel::mouseMoved)
+EVT_RIGHT_DOWN(DrawPanel::rightClick)
 END_EVENT_TABLE()
 
 
-BasicDrawPane::BasicDrawPane(wxFrame* parent) :
+DrawPanel::DrawPanel(wxFrame* parent) :
 wxPanel(parent)
 {
 }
-void BasicDrawPane::mouseDown(wxMouseEvent& event)
+void DrawPanel::mouseDown(wxMouseEvent& event)
 {
     drawing = true;
     wxClientDC dc(this);
@@ -89,7 +89,7 @@ void BasicDrawPane::mouseDown(wxMouseEvent& event)
     dc.DrawCircle(wxPoint(oldXPos,oldYPos), 5);
     //render(dc);
 }
-void BasicDrawPane::mouseMoved(wxMouseEvent& event)
+void DrawPanel::mouseMoved(wxMouseEvent& event)
 {
     if(drawing){
         wxClientDC dc(this);
@@ -101,7 +101,7 @@ void BasicDrawPane::mouseMoved(wxMouseEvent& event)
         oldYPos = y;
     }
 }
-void BasicDrawPane::rightClick(wxMouseEvent& event)
+void DrawPanel::rightClick(wxMouseEvent& event)
 {
     drawing = false;
 }
