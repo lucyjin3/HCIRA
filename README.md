@@ -39,5 +39,7 @@ https://siytek.com/macos-gui-cpp/
 
 ### Authors
 Sydney McLaughlin
+
 Cameron Vallin
+
 Hyoyoung Jin
