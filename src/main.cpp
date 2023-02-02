@@ -1,6 +1,7 @@
 #include "wx/wx.h"
 #include "wx/sizer.h"
 
+//panel class (canvas) to draw in
 class DrawPanel : public wxPanel
 {
     
@@ -17,6 +18,7 @@ public:
     DECLARE_EVENT_TABLE()
 };
 
+//Frame which holds the panel
 class myFrame : public wxFrame
 {
 public:
@@ -36,7 +38,8 @@ class MyApp: public wxApp
 
 IMPLEMENT_APP(MyApp)
 
-
+//main function
+//Runs during initilization
 bool MyApp::OnInit()
 {
     myFrame* frame = new myFrame();
@@ -44,6 +47,7 @@ bool MyApp::OnInit()
     return true;
 } 
 
+//Constructor to create window and generate the menubar
 myFrame::myFrame() : wxFrame((wxFrame *)NULL, -1,  wxT("Project 1 Canvas"), wxPoint(50,50), wxSize(800,600))
 {
 
@@ -63,6 +67,7 @@ myFrame::myFrame() : wxFrame((wxFrame *)NULL, -1,  wxT("Project 1 Canvas"), wxPo
 
     Bind(wxEVT_MENU, &myFrame::OnReset, this, ID_Reset);
 }
+//When reset is clicked, the canvas will be cleared
 void myFrame::OnReset(wxCommandEvent &event)
 {
     Refresh();
@@ -79,18 +84,24 @@ DrawPanel::DrawPanel(wxFrame* parent) :
 wxPanel(parent)
 {
 }
+//When left button is clicked on the panel, drawing will begin when the mouse is moved
 void DrawPanel::mouseDown(wxMouseEvent& event)
 {
     drawing = true;
     wxClientDC dc(this);
+    //stores the first coordinate
     oldXPos = event.GetPosition().x;
     oldYPos = event.GetPosition().y;
+    //Circle will be drawn where the click happened to be able to see first point
     dc.SetBrush(*wxBLACK_BRUSH);
     dc.DrawCircle(wxPoint(oldXPos,oldYPos), 5);
-    //render(dc);
 }
+
+//When drawing has been enabled, the mouse can draw on the canvas
 void DrawPanel::mouseMoved(wxMouseEvent& event)
 {
+    //using the first coordinate when left button is clicked
+    //will draw a line between each of the coordinates
     if(drawing){
         wxClientDC dc(this);
         int x = event.GetPosition().x;
@@ -101,6 +112,8 @@ void DrawPanel::mouseMoved(wxMouseEvent& event)
         oldYPos = y;
     }
 }
+
+//When the right button is clicked, drawing will turn off
 void DrawPanel::rightClick(wxMouseEvent& event)
 {
     drawing = false;
