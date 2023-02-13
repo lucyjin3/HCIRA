@@ -1,12 +1,14 @@
 #include "wx/wx.h"
 #include "wx/sizer.h"
 #include<bits/stdc++.h>
-#include <vector>
-#include <utility>
+#include <cmath>
+
 using namespace std;
 
-//To Do: Create a nested class to store the name of the drawing and the array of coordinate points (use pairs)???
-//Resampling, Rotation, Scaling + Translation, Match
+//Done- To Do: (a) Create a nested class to store the name of the drawing and the array of coordinate points (use pairs)???
+//To Do: (c) Resampling, Rotation, Scaling + Translation
+//Every template/drawing needs to go through these functions to ^
+//To Do: (d) Match drawing to a template
 //panel class (canvas) to draw in
 class DrawPanel : public wxPanel
 {
@@ -22,6 +24,14 @@ public:
         this->name = name;
         this->points = points;
     }
+        double distance(pair<int,int> a, pair<int,int> b);
+        double pathLength(const std::vector<pair<int,int>>& points);
+        vector<pair<int,int>> Resample(const std::vector<pair<int,int>>& points, int n);
+        pair<int,int> centroid(const std::vector<pair<int,int>>& points);
+        vector<pair<int,int>> RotateBy(const vector<pair<int,int>>& points, double radians);
+        pair<int, int> boundingBox(const std::vector<pair<int,int>> &points);
+        vector<pair<int,int>> ScaleTo(const vector<pair<int,int>> &points, int size);
+        vector<pair<int,int>> TranslateTo(const vector<pair<int,int>> &points, const pair<int,int> &pt);
         string name;
         vector<pair<int,int>> points;
     };
@@ -32,6 +42,10 @@ public:
     void mouseMoved(wxMouseEvent& event);
     void leftClick(wxMouseEvent& event);
     void rightClick(wxMouseEvent& event);
+    // double distance(pair<int,int> a, pair<int,int> b);
+    // double pathLength(const std::vector<pair<int,int>>& points);
+
+    // vector<pair<int,int>> Resample(const std::vector<pair<int,int>>& points, int n);
     //void erase(wxMouseEvent& event);
     bool drawing = false;
     int oldXPos;
@@ -195,7 +209,7 @@ void DrawPanel::leftClick(wxMouseEvent& event)
 }
 
 //When drawing has been enabled, the mouse can draw on the canvas
-//To Do: Store the points into an array and create drawing class for that figure
+//Done: To Do: Store the points into an array and create drawing class for that figure
 void DrawPanel::mouseMoved(wxMouseEvent& event)
 {
     //using the first coordinate when left button is clicked
@@ -218,4 +232,90 @@ void DrawPanel::rightClick(wxMouseEvent& event)
 {
     drawing = false;
     
+}
+//pair.first is x, pair.second is y
+double DrawPanel::Stroke::distance(pair<int,int> a, pair<int,int> b) {
+    return sqrt((a.first - b.first) * (a.first - b.first) + (a.second - b.second) * (a.first - b.second));
+}
+
+double DrawPanel::Stroke::pathLength(const vector<pair<int,int>>& points) {
+    double length = 0;
+    for (int i = 1; i < points.size(); i++)
+        length += distance(points[i - 1], points[i]);
+    return length;
+}
+
+vector<pair<int,int>> DrawPanel::Stroke::Resample(const vector<pair<int,int>>& points, int n) {
+    double I = pathLength(points) / (n - 1);
+    double D = 0.0;
+    vector<pair<int,int>> newpoints;
+    newpoints.push_back(points[0]);
+    for (int i = 1; i < points.size(); i++) {
+        double d = distance(points[i - 1], points[i]);
+        if ((D + d) >= I) {
+            double qx = points[i - 1].first + ((I - D) / d) * (points[i].first - points[i - 1].first);
+            double qy = points[i - 1].second + ((I - D) / d) * (points[i].second - points[i - 1].second);
+            pair<int,int> point(qx, qy);
+            newpoints.push_back(point);
+            D = 0.0;
+        }
+        else D += d;
+    }
+    if (newpoints.size() == n - 1)
+        newpoints.push_back(make_pair(points[points.size() - 1].first, points[points.size() - 1].second));
+    return newpoints;
+}
+pair<int,int> DrawPanel::Stroke::centroid(const vector<pair<int,int>>& points) {
+    double x = 0, y = 0;
+    for (const auto& point : points) {
+        x += point.first;
+        y += point.second;
+    }
+    x /= points.size();
+    y /= points.size();
+    return make_pair(x, y);
+}
+
+vector<pair<int,int>> DrawPanel::Stroke::RotateBy(const vector<pair<int,int>>& points, double radians) {
+    pair<int,int> c(centroid(points));
+    double cosine = cos(radians);
+    double sine = sin(radians);
+    vector<pair<int,int>> newpoints;
+    for (const auto& point : points) {
+        double qx = (point.first - c.first) * cosine - (point.second- c.second) * sine + c.first;
+        double qy = (point.first - c.first) * sine + (point.second - c.second) * cosine + c.second;
+        newpoints.push_back(make_pair(qx, qy));
+    }
+    return newpoints;
+}
+pair<int, int> DrawPanel::Stroke::boundingBox(const vector<pair<int,int>> &points) {
+    int minX = INT_MAX, maxX = INT_MIN, minY = INT_MAX, maxY = INT_MIN;
+    for (const auto &point : points) {
+        minX = std::min(minX, point.first);
+        maxX = std::max(maxX, point.first);
+        minY = std::min(minY, point.second);
+        maxY = std::max(maxY, point.second);
+    }
+    return {maxX - minX, maxY - minY};
+}
+vector<pair<int,int>> DrawPanel::Stroke::ScaleTo(const vector<pair<int,int>> &points, int size) {
+    auto B = boundingBox(points);
+    std::vector<pair<int,int>> newPoints;
+    for (const auto &point : points) {
+        int qx = point.first * (size / B.first);
+        int qy = point.second * (size / B.second);
+        newPoints.emplace_back(qx, qy);
+    }
+    return newPoints;
+}
+
+vector<pair<int,int>> DrawPanel::Stroke::TranslateTo(const vector<pair<int,int>> &points, const pair<int,int> &pt) {
+    auto c = centroid(points);
+   vector<pair<int,int>> newPoints;
+    for (const auto &point : points) {
+        int qx = point.first + pt.first - c.first;
+        int qy = point.second + pt.second - c.second;
+        newPoints.emplace_back(make_pair(qx, qy));
+    }
+    return newPoints;
 }
