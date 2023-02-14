@@ -27,7 +27,7 @@ clicked, the code will call the OnReset function of the myFrame class on line 66
 ##### Related Functions: centroid(), IndicativeAngle()
 
 #### 3) Scaling + Translation
-[Line341-350,366-398] For scaling, the scaleTo() function scales the gesture to fit in the bounding box. The TranslateTo function moves the center of the gesture to the origin(0,0) so it can be compared. The bounding box keeps the drawing in the box of a certain size(250.0). The boundingBox function returns the width(res.first) and height(res.second). Thhe points and size must be double. 
+[Line341-350,366-398] For scaling, the scaleTo() function scales the gesture to fit in the bounding box. The TranslateTo() function moves the center of the gesture to the origin(0,0) so it can be compared. The bounding box keeps the drawing in the box of a certain size(250.0). The boundingBox() function returns the width(res.first) and height(res.second). The points and size must be double. 
 ##### Related Functions: boundingBox()
 
 #### 4) Matching process
