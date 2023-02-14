@@ -1,10 +1,10 @@
 # Project 1 Part 2: Online/ Live Recognition
 
-## Desciption
+## Description
 This project uses the wxWidgets library in C++ to generate a canvas and allows
 the user to draw on the canvas.
 
-###General Features
+### General Features
 When using the canvas, a left click on the mouse will allow the user to begin drawing.
 This can be seen on line 84 of the code in the leftClick function of the DrawPanel class.
 
