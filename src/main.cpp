@@ -6,10 +6,9 @@
 
 using namespace std;
 
-//Done- To Do: (a) Create a nested class to store the name of the drawing and the array of coordinate points (use pairs)???
-//To Do: (c) Resampling, Rotation, Scaling + Translation
+//Done - To Do: (2a) Create a nested class to store the name of the drawing and the array of coordinate points (use pairs)???
+//Done - To Do: (2c) Resampling, Rotation, Scaling + Translation
 //Every template/drawing needs to go through these functions to ^
-//To Do: (d) Match drawing to a template
 //panel class (canvas) to draw in
 class DrawPanel : public wxPanel
 {
@@ -20,11 +19,11 @@ public:
         string Name;
         double Score;
         int Time;
-        Result(std::string name, double score, int time) :
+        Result(string name, double score, int time) :
             Name(name), Score(score), Time(time) {}
     };
     // one stroke per gesture type
-    //(b)
+    //(2b)
     class Stroke{
 
     public:
@@ -38,17 +37,18 @@ public:
             this->points = ScaleTo(this->points, sqSize);
             this->points = TranslateTo(this->points, o);
         }
+        //pass vectors by reference
         double distance(pair<double,double> a, pair<double,double> b);
-        double pathLength(const std::vector<pair<double,double>>& points);
-        vector<pair<double,double>> Resample(std::vector<pair<double,double>>& points, int n);
-        pair<double,double> centroid(const std::vector<pair<double,double>>& points);
+        double pathLength(const vector<pair<double,double>>& points);
+        vector<pair<double,double>> Resample(vector<pair<double,double>>& points, int n);
+        pair<double,double> centroid(const vector<pair<double,double>>& points);
         vector<pair<double,double>> RotateBy(const vector<pair<double,double>>& points, double radians);
-        pair<double, double> boundingBox(const std::vector<pair<double,double>> &points);
+        pair<double, double> boundingBox(const vector<pair<double,double>> &points);
         vector<pair<double,double>> ScaleTo(const vector<pair<double,double>> &points, double size);
         vector<pair<double,double>> TranslateTo(const vector<pair<double,double>> &points, const pair<double,double> &pt);
         double IndicativeAngle(const vector<pair<double,double>> &points);
         // double DistanceAtAngle(const vector<pair<double,double>> &points, const Stroke &t, double radians);
-        // double DistanceAtBestAngle(const std::vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold);
+        // double DistanceAtBestAngle(const vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold);
         string name;
         vector<pair<double,double>> points;
         const double sqSize = 250.0;
@@ -70,9 +70,9 @@ public:
     Result Recognize(vector<pair<double,double>>& points, vector<Stroke> Unistrokes);
 
     double DistanceAtAngle(const vector<pair<double,double>> &points, const Stroke &t, double radians);
-    double DistanceAtBestAngle(const std::vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold);
+    double DistanceAtBestAngle(const vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold);
     vector<pair<double,double>> RotateBy(const vector<pair<double,double>>& points, double radians);
-    pair<double,double> centroid(const std::vector<pair<double,double>>& points);
+    pair<double,double> centroid(const vector<pair<double,double>>& points);
     double PathDistance(vector<pair<double,double>>& pts1, vector<pair<double,double>> pts2);
     const double sqSize = 250.0;
     const double Diagonal = sqrt(sqSize * sqSize + sqSize * sqSize);
@@ -82,9 +82,9 @@ public:
     const double Phi = 0.5 * (-1.0 + sqrt(5));
     double distance(pair<double,double> a, pair<double,double> b);
     //double distance(pair<double,double> a, pair<double,double> b);
-    // double pathLength(const std::vector<pair<double,double>>& points);
+    // double pathLength(const vector<pair<double,double>>& points);
     void TestingDraw(vector<pair<double,double>>& points);
-    // vector<pair<double,double>> Resample(const std::vector<pair<double,double>>& points, int n);
+    // vector<pair<double,double>> Resample(const vector<pair<double,double>>& points, int n);
     //void erase(wxMouseEvent& event);
     bool drawing = false;
     int oldXPos;
@@ -231,7 +231,7 @@ DrawPanel::DrawPanel(wxFrame* parent) :wxPanel(parent)
 //     this->points = points;
 
 // }
-//When left button is clicked on the panel, drawing will begin when the mouse is moved
+//Helper function to visualize points as they change (resample, rotate, sample, translate)
 void DrawPanel::TestingDraw(vector<pair<double,double>>& points)
 {
     wxClientDC dc(this);
@@ -245,6 +245,7 @@ void DrawPanel::TestingDraw(vector<pair<double,double>>& points)
         oldY = points[i].second;
     }
 }
+//When left button is clicked on the panel, drawing will begin when the mouse is moved
 void DrawPanel::leftClick(wxMouseEvent& event)
 {
     //TestingDraw(templates[0].points);
@@ -262,7 +263,7 @@ void DrawPanel::leftClick(wxMouseEvent& event)
 }
 
 //When drawing has been enabled, the mouse can draw on the canvas
-//Done: To Do: Store the points into an array and create drawing class for that figure
+//Done: To Do: (1)Store the points into an array and create drawing class for that figure
 void DrawPanel::mouseMoved(wxMouseEvent& event)
 {
     //using the first coordinate when left button is clicked
@@ -281,8 +282,6 @@ void DrawPanel::mouseMoved(wxMouseEvent& event)
 }
 
 //When the right button is clicked, drawing will turn off
-//To Do:: check that the drawing has at least 64 points, add it as a stroke (this will do the four functions on the points),
-//        then change the frame to the predicted template
 void DrawPanel::rightClick(wxMouseEvent& event)
 {
     
@@ -310,7 +309,8 @@ double DrawPanel::Stroke::pathLength(const vector<pair<double,double>>& points) 
          length += distance(points[i - 1], points[i]);
     return length;
 }
-
+//need to use double instead of int to get 64 points
+//MUST RETURN VECTOR WITH 64 POINTS
 vector<pair<double,double>> DrawPanel::Stroke::Resample(vector<pair<double,double>>& points, int n) {
     double I = pathLength(points) / (n - 1);
     double D = 0.0;
@@ -331,11 +331,13 @@ vector<pair<double,double>> DrawPanel::Stroke::Resample(vector<pair<double,doubl
         }
         else D += d;
     }
+    //edge case to ensure 64 points
     if (newpoints.size() == n - 1){
         newpoints.push_back(make_pair(points[points.size() - 1].first, points[points.size() - 1].second));
     }
     return newpoints;
 }
+//Returns the middle point of the gesture
 pair<double,double> DrawPanel::Stroke::centroid(const vector<pair<double,double>>& points) {
     double x = 0, y = 0;
     for (const auto& point : points) {
@@ -346,7 +348,7 @@ pair<double,double> DrawPanel::Stroke::centroid(const vector<pair<double,double>
     y /= points.size();
     return make_pair(x, y);
 }
-
+//Rotates the points around the middle point (the centroid)
 vector<pair<double,double>> DrawPanel::Stroke::RotateBy(const vector<pair<double,double>>& points, double radians) {
     pair<double,double> c(centroid(points));
     double cosine = cos(radians);
@@ -359,21 +361,24 @@ vector<pair<double,double>> DrawPanel::Stroke::RotateBy(const vector<pair<double
     }
     return newpoints;
 }
+//Keeps the drawing in a box of certain size (250.0)
+//Returns width(res.first) and height(res.second)
 pair<double, double> DrawPanel::Stroke::boundingBox(const vector<pair<double,double>> &points) {
     double minX = DBL_MAX, maxX = DBL_MIN, minY = DBL_MAX, maxY = DBL_MIN;
     for (const auto &point : points) {
-        minX = std::min(minX, point.first);
-        maxX = std::max(maxX, point.first);
-        minY = std::min(minY, point.second);
-        maxY = std::max(maxY, point.second);
+        minX = min(minX, point.first);
+        maxX = max(maxX, point.first);
+        minY = min(minY, point.second);
+        maxY = max(maxY, point.second);
     }
     pair<double,double> res(maxX - minX, maxY - minY);
     return res;
 }
-
+//scales the gesture to fit in the bounding box
+//points and size must be double, not int
 vector<pair<double,double>> DrawPanel::Stroke::ScaleTo(const vector<pair<double,double>> &points, double size) {
      auto B = boundingBox(points);
-    std::vector<pair<double,double>> newPoints;
+    vector<pair<double,double>> newPoints;
         for (const auto &point : points) { 
         double qx = point.first * (size / B.first);
         double qy = point.second * (size / B.second);
@@ -382,6 +387,7 @@ vector<pair<double,double>> DrawPanel::Stroke::ScaleTo(const vector<pair<double,
     return newPoints;
 }
 
+//Moves the center of the gesture to the origin (0,0) so it can be compared
 vector<pair<double,double>> DrawPanel::Stroke::TranslateTo(const vector<pair<double,double>> &points, const pair<double,double> &pt) {
     auto c = centroid(points);
    vector<pair<double,double>> newPoints;
@@ -392,35 +398,39 @@ vector<pair<double,double>> DrawPanel::Stroke::TranslateTo(const vector<pair<dou
     }
     return newPoints;
 }
-DrawPanel::Result DrawPanel::Recognize(vector<pair<double,double>>& points, vector<Stroke> Unistrokes) {
-  std::clock_t t0 = clock();
+
+//Done - To Do: (2d) Match drawing to a template
+//Compares the gesture drawn to the 16 templates, and returns the template that matches with the score and time
+DrawPanel::Result DrawPanel::Recognize(vector<pair<double,double>>& points, vector<Stroke> temp) {
+  clock_t t0 = clock();
   Stroke candidate = Stroke("", points);
 
-  int u = -1;
-  double b = std::numeric_limits<double>::infinity();
-  for (int i = 0; i < Unistrokes.size(); i++) {
+  int index = -1;
+  //double b = DBL_MAX
+  double b = numeric_limits<double>::infinity();
+  for (int i = 0; i < temp.size(); i++) {
     double d;
-    //cout << Unistrokes[i].name << "\n";
-    d = DistanceAtBestAngle(candidate.points, Unistrokes[i], -AngleRange, AngleRange, AnglePrecision);
+    //cout << temp[i].name << "\n";
+    d = DistanceAtBestAngle(candidate.points, temp[i], -AngleRange, AngleRange, AnglePrecision);
 
     if (d < b) {
       b = d;
-      u = i;
+      index = i;
     }
   }
-  std::clock_t t1 = clock();
-  if (u == -1) {
+  clock_t t1 = clock();
+  if (index == -1) {
     return Result("No match.", 0.0, t1 - t0);
   } else {
     
     //cout << b << "\n" << HalfDiagonal;
-    return Result(Unistrokes[u].name, 1.0 - b / HalfDiagonal, t1 - t0);
+    return Result(temp[index].name, 1.0 - b / HalfDiagonal, t1 - t0);
     
   }
 }
 //const double Phi = 0.5 * (1 + sqrt(5));
 
-double DrawPanel::DistanceAtBestAngle(const std::vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold)
+double DrawPanel::DistanceAtBestAngle(const vector<pair<double,double>> &points, const Stroke &t, double a, double b, double threshold)
 {
     double x1 = Phi * a + (1.0 - Phi) * b;
     double f1 = DistanceAtAngle(points, t, x1);
@@ -457,9 +467,9 @@ double DrawPanel::DistanceAtAngle(const vector<pair<double,double>> &points, con
 double DrawPanel::Stroke::IndicativeAngle(const vector<pair<double,double>> &points)
 {
     pair<double,double> c(centroid(points));
-    return atan2(c.second - points[0].second, c.first - points[0].first);
+    return atan2(c.second - points[0].second, c.first - points[0].first);//arc tangent
 }
-
+//Same as rotateby function above but in a different class
 vector<pair<double,double>> DrawPanel::RotateBy(const vector<pair<double,double>>& points, double radians) {
     pair<double,double> c(centroid(points));
     double cosine = cos(radians);
@@ -472,6 +482,7 @@ vector<pair<double,double>> DrawPanel::RotateBy(const vector<pair<double,double>
     }
     return newpoints;
 }
+//same as centroid function above but in a different class
 pair<double,double> DrawPanel::centroid(const vector<pair<double,double>>& points) {
     double x = 0, y = 0;
     for (const auto& point : points) {
@@ -489,6 +500,7 @@ double DrawPanel::PathDistance(vector<pair<double,double>>& pts1, vector<pair<do
 		d += distance(pts1[i], pts2[i]);
 	return d / pts1.size();
 }
+//same as distance function above but in a different class
 double DrawPanel::distance(pair<double,double> a, pair<double,double> b) {
-    return sqrt(abs(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second))));
+    return sqrt(((b.first - a.first) * (b.first - a.first)) + ((b.second - a.second) * (b.second - a.second)));
 }
