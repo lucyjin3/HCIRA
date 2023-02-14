@@ -1,12 +1,12 @@
 # Project 1 Part 1: Drawing on a Canvas
 
-#Desciption
+# Desciption
 This project uses the wxWidgets library in C++ to generate a canvas and allows
 the user to draw on the canvas.
 
-#Features
+# Features
 When using the canvas, a left click on the mouse will allow the user to begin drawing.
-This can be seen on line 84 of the code in the mouseDown function of the DrawPanel class.
+This can be seen on line 84 of the code in the leftClick function of the DrawPanel class.
 
 The user does not need to hold the left button to draw. In the mouseMoved function of the DrawPanel class on line 92,
 if the left button has been clicked, the user can draw on the canvas by moving the mouse.
