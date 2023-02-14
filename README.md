@@ -20,16 +20,16 @@ clicked, the code will call the OnReset function of the myFrame class on line 66
 
 ### 4 components 
 1) [Line314-339,504-506] For resampling, the Resample() function had to return a vector with 64 points. In order to return the exact number of points, we used a double instead of an integer. In addition, we also added an edge case to ensure we had 64 points in the vector.
-Related Functions: distance()
+# Related Functions: distance()
 
 2) [Line341-363,467-471] For rotation, the RotateBy() function rotates the point around the middle point, which is the centroid. In order to find the middle point of the gesture, we created a centroid() function to store the middle point of the gesture.
-Related Functions: centroid(), IndicativeAngle()
+# Related Functions: centroid(), IndicativeAngle()
 
 3) [Line341-350,366-398] For scaling, the scaleTo() function scales the gesture to fit in the bounding box. The TranslateTo function moves the center of the gesture to the origin(0,0) so it can be compared. The bounding box keeps the drawing in the box of a certain size(250.0). The boundingBox function returns the width(res.first) and height(res.second). Thhe points and size must be double. 
-Related Functions: boundingBox()
+# Related Functions: boundingBox()
 
 4) [Line404-465,496-506] For the matching process, the Recognize() function matches the gesture to one of the 16 templates and returns the template that matches with the score and time. 
-Related Functions: DistanceAtBestAngle(),DistanceAtAngle(), PathDistance(), distance()
+# Related Functions: DistanceAtBestAngle(),DistanceAtAngle(), PathDistance(), distance()
 
 ### Installation
 The wxWidgets library is needed to run the source code. 
