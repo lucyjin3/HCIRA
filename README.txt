@@ -1,4 +1,4 @@
-# Project 1 Part 3: Offline/Test Recognition with $1
+# Project 1 Part 3: Offline / Test Recognition with $1
 
 ## Description
 This project implements the $1 algorithm from the $-family of gesture recognition algorithms. This will read in a gesture dataset from files, connect to existing $1 recognition methods, go over the gesture dataset to test the recognizer. This will output the result of the recognition tests to a log file. 
@@ -10,7 +10,7 @@ This project implements the $1 algorithm from the $-family of gesture recognitio
 [Lines 498-499 ] This line stores all gestures and preprocesses them into our Stroke class. This allows us to access the preprocessed points later in our data structure. 
 #### Part c) Loop over Dataset 
 [Line 510-592] This loop is a representation of the pseudocode for the user-dependent random-100 loop. For each user, we looped for each example 10 times. For each gesture, we chose E(example) templates from user, gesture set. Then we chose 1 candidate to test against the templates from user, gesture set. 
-#### Part d) Output the Result
+#### Part d) Output the Result 
 [Line 502-509, 562-592, 594-670] CreateCSV(), OutputCSV(), TrainingSetVector(), NBestSortedList(). These methods take in the information that the recognized funciton outputs and outputs them into a csv file. We calculated an output of the average accuracy per user and total accuracy for all users. 
 
 
