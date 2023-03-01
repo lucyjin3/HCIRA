@@ -1,17 +1,17 @@
-# Project 1 Part 3: Offline / Test Recognition with $1
+# Project 1 Part 4: Collecting Data from People
 
 ## Description
-This project implements the $1 algorithm from the $-family of gesture recognition algorithms. This will read in a gesture dataset from files, connect to existing $1 recognition methods, go over the gesture dataset to test the recognizer. This will output the result of the recognition tests to a log file. 
+This project implements the $1 algorithm from the $-family of gesture recognition algorithms. This will write the gesture the user draws to a file. The user will be given prompts to draw 10 samples of each gesture type one at a time and write them into a file. 
 
 ### General Features
-#### Part a) Read in Dataset
-[Lines 274-500] Extracting(), ExtractXML(). These two methods read the XML files and parse them into our vectors. This reads the raw points, the gestures, and the subject. 
-#### Part b) Connect to Recognizer
-[Lines 498-499 ] This line stores all gestures and preprocesses them into our Stroke class. This allows us to access the preprocessed points later in our data structure. 
-#### Part c) Loop over Dataset 
-[Line 510-592] This loop is a representation of the pseudocode for the user-dependent random-100 loop. For each user, we looped for each example 10 times. For each gesture, we chose E(example) templates from user, gesture set. Then we chose 1 candidate to test against the templates from user, gesture set. 
-#### Part d) Output the Result 
-[Line 502-509, 562-592, 594-670] CreateCSV(), OutputCSV(), TrainingSetVector(), NBestSortedList(). These methods take in the information that the recognized funciton outputs and outputs them into a csv file. We calculated an output of the average accuracy per user and total accuracy for all users. 
+#### Part a) Write Gesture Files
+[Lines 836-905] writeXML(), . These methods writes the gesture the user draws to an XML file that is created. The XML file outputs the raw points of each sample in each of the 16 gestures.  
+#### Part b) Prompt for Specific Samples
+[Lines 201-205, 218-221, 235-246, 248-284] onReset(), submitButton(), changePrompt(). These methods are utilized to display a prompt on the screen indicating what gesture the user should draw next. A button for reset and submit is created so that when the user is finished drawing the gesture, they can press "submit" and if the user wants to redo their gesture, they can press "reset". When the user is done with all 16 gestures, a prompt that writes "complete" pops up. 
+#### Part c) Recruit 6 People 
+6 people have been recruited under informed consent prior to collecting data and they have been labeled with different subjects(s01, s02, ... etc).
+#### Part d) Submit Full Dataset 
+The final dataset contains 160 samples per person( 16 gesture types x 10 samples) for each of the 6 people. This is a total of 960 gesture samples. 
 
 
 ### Installation
@@ -23,11 +23,9 @@ Click the Debug tab -> Start without debug
 
 ### Resources
 https://rapidxml.sourceforge.net/manual.html
-https://www.geeksforgeeks.org/csv-file-management-using-c/
-https://linuxhint.com/parse_xml_in_cpp/
-https://spin.atomicobject.com/2012/05/20/rapidxml-a-lightweight-xml-library-for-c/
-https://www.digitalocean.com/community/tutorials/random-number-generator-c-plus-plus
-
+https://stackoverflow.com/questions/303371/whats-the-easiest-way-to-generate-xml-in-c 
+https://www.codeproject.com/Articles/5588/Simple-C-class-for-XML-writing 
+https://comp.soft-sys.wxwindows.narkive.com/TJoVjb53/wxtextctrl-and-wxte-readonly 
 
 ### Authors
 Hyoyoung Jin
@@ -35,5 +33,3 @@ Hyoyoung Jin
 Sydney McLaughlin
 
 Cameron Vallin
-
-
