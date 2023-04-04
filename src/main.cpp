@@ -1,8 +1,15 @@
+//Authors:
+//Hyoyoung Jin
+//Sydney McLaughlin
+//Cameron Vallin
+
+
 #include "wx/wx.h"
 #include "wx/sizer.h"
+#include <wx/textctrl.h>
 #include <wx/msgdlg.h>
 #include <cmath>
-#include <rapidxml/rapidxml.hpp>
+#include "rapidxml_ext.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -10,6 +17,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <numeric>
+#include <windows.h>
+//#include "rapidxml/rapidxml_print.hpp"
 
 using namespace std;
 using namespace rapidxml;
@@ -76,6 +85,7 @@ public:
         const double Phi = 0.5 * (-1.0 + sqrt(5.0));
         
     };
+    //Part 3 functions
     void extractXML();
     void extracting(const string subject, const string gesture);
     void offlineLoop();
@@ -87,6 +97,18 @@ public:
     string TrainingSetVector(string subject, vector<Stroke>& templates);
     string NBestSortedList(string subject, Result res);
 
+    //Part 4 functions
+    void writeXML(string gesture, int num);
+    void changePrompt();
+    void submitButton(wxCommandEvent& event);
+    void OnReset(wxCommandEvent& event);
+    vector<string> allGestures{ "arrow", "caret", "check","circle", "delete_mark","left_curly_brace","left_sq_bracket","pigtail","zig-zag","rectangle","right_curly_brace","right_sq_bracket","star","triangle","v","x" };
+    int currentGes = 0;
+    int samNum = 1;
+    wxTextCtrl* gesture;
+    wxTextCtrl* sampleNum;
+
+    void ShowResults();
     const int numTemplates = 16;
     DrawPanel(wxFrame* parent);
     void InputTemplates();
@@ -131,7 +153,7 @@ class myFrame : public wxFrame
 public:
     myFrame();
     DrawPanel* drawPane;
-    void OnReset(wxCommandEvent& event);
+    //void OnReset(wxCommandEvent& event);
 };
 enum
 {
@@ -164,12 +186,12 @@ bool MyApp::OnInit()
 myFrame::myFrame() : wxFrame((wxFrame*)NULL, -1, wxT("Project 1 Canvas"), wxPoint(50, 50), wxSize(800, 600))
 {
 
-    wxMenu* menuReset = new wxMenu;
+    /*wxMenu* menuReset = new wxMenu;
     menuReset->Append(ID_Reset, "&Reset");
 
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(menuReset, "&Reset");
-    SetMenuBar(menuBar);
+    SetMenuBar(menuBar);*/
 
     wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     drawPane = new DrawPanel(this);
@@ -178,11 +200,14 @@ myFrame::myFrame() : wxFrame((wxFrame*)NULL, -1, wxT("Project 1 Canvas"), wxPoin
     SetSizer(sizer);
     SetAutoLayout(true);
 
-    Bind(wxEVT_MENU, &myFrame::OnReset, this, ID_Reset);
+    //Bind(wxEVT_MENU, &myFrame::OnReset, this, ID_Reset);
 }
 //When reset is clicked, the canvas will be cleared
-void myFrame::OnReset(wxCommandEvent& event)
+void DrawPanel::OnReset(wxCommandEvent& event)
 {
+    cout << "Reset\n";
+    //points.clear();
+    drawing = false;
     Refresh();
 }
 BEGIN_EVENT_TABLE(DrawPanel, wxPanel)
@@ -196,11 +221,74 @@ END_EVENT_TABLE()
 //stores the 16 templates (b)
 DrawPanel::DrawPanel(wxFrame* parent) :wxPanel(parent)
 {
+    wxButton* submitButton = new wxButton(this, wxID_ANY, wxT("Submit"), wxPoint(700, 500));
+    wxButton* resetButton = new wxButton(this, wxID_ANY, wxT("Reset"), wxPoint(10, 500));
+    submitButton->Bind(wxEVT_BUTTON, &DrawPanel::submitButton, this, submitButton->GetId());
+    resetButton->Bind(wxEVT_BUTTON, &DrawPanel::OnReset, this, resetButton->GetId());
+    /*string ges = "Gesture: " + allGestures[currentGes];
+    string sam = "Sample #: " + to_string(samNum);
+    wxTextCtrl* gesture = new wxTextCtrl(this, wxID_ANY, ges, wxPoint(0, 0), wxSize(800, 30),
+        wxTE_READONLY);
+    wxTextCtrl* sampleNum = new wxTextCtrl(this, wxID_ANY, sam, wxPoint(0, 30), wxSize(800, 30),
+        wxTE_READONLY);*/
     //InputTemplates();
-    extractXML();
-    createCSV();
-    offlineLoop();
-    cout << "Done\n";
+    
+    // Part 3
+    //extractXML();
+    //createCSV();
+    //offlineLoop();
+    //cout << "Done\n";
+    changePrompt();
+}
+void DrawPanel::submitButton(wxCommandEvent& event)
+{
+    writeXML(allGestures[currentGes], samNum);
+    samNum++;
+    if (samNum > 10)
+    {
+        currentGes++;
+        samNum = 1;
+    }
+    //writeXML(allGestures[currentGes], samNum);
+    Refresh();
+    changePrompt();
+}
+void DrawPanel::changePrompt()
+{
+    //vector<string> allGestures{ "arrow", "caret", "check","circle", "delete_mark","left_curly_brace","left_sq_bracket","pigtail","question_mark","rectangle","right_curly_brace","right_sq_bracket","star","triangle","v","x"};
+    if (currentGes == allGestures.size())
+    {
+        wxTextCtrl* gesture = new wxTextCtrl(this, wxID_ANY, "Gesture: Complete! Thank you!", wxPoint(0, 0), wxSize(800, 30),
+            wxTE_READONLY);
+        wxTextCtrl* sampleNum = new wxTextCtrl(this, wxID_ANY, "Sample #: ", wxPoint(0, 30), wxSize(800, 30),
+            wxTE_READONLY);
+        return;
+    }
+    string ges = "Gesture: " + allGestures[currentGes];
+    string sam = "Sample #: " + to_string(samNum);
+    wxTextCtrl* gesture = new wxTextCtrl(this, wxID_ANY, ges, wxPoint(0, 0), wxSize(800, 30),
+        wxTE_READONLY);
+    wxTextCtrl* sampleNum = new wxTextCtrl(this, wxID_ANY, sam, wxPoint(0, 30), wxSize(800, 30),
+        wxTE_READONLY);
+    //string output = ges + "arrow";
+    //gesture->ChangeValue(ges);
+    //sampleNum->ChangeValue(sam);
+
+  /*  string gesOutput = "";
+    string samOutput = "";
+    for (int i = 0; i < allGestures.size(); i++)
+    {
+        for (int j = 1; j <= 10; j++)
+        {
+            gesOutput = ges + " " + allGestures[i];
+            samOutput = sam + " " + to_string(j);
+            gesture->ChangeValue(gesOutput);
+            sampleNum->ChangeValue(samOutput);
+
+        }
+    }*/
+    
+    
 }
 void DrawPanel::InputTemplates()
 {
@@ -737,6 +825,11 @@ void DrawPanel::rightClick(wxMouseEvent& event)
 
     drawing = false;
     //TestingDraw(templates[0].points);
+    //ShowResults();
+    //writeXML();
+}
+void DrawPanel::ShowResults() 
+{
     Result res = Recognize(points, templates);
     string msgOutput = "Result: ";
     msgOutput += res.Name;
@@ -746,6 +839,77 @@ void DrawPanel::rightClick(wxMouseEvent& event)
     msgOutput += to_string(res.Time);
     msgOutput += "ms.";
     int answer = wxMessageBox(msgOutput, "Recognizer Message", wxOK);
+}
+//  write gesture files
+void DrawPanel::writeXML(string gesture, int num) 
+{
+    //increment subject for each person 
+    string subject = "s00";
+    string ges = "";
+    if (num < 10)
+    {
+        ges = gesture + "0" + to_string(num);
+    }
+    else
+    {
+        ges = gesture + to_string(num);
+    }
+    string filename = "part4_xml_logs/" + subject + "/" + ges + ".xml";
+    //const char* file = filename.c_str();
+    ofstream myFile(filename.c_str());
+    //myFile.open(filename);
+    if (!myFile.is_open())
+    {
+        cout << "False";
+    }
+    //std::string newXml = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?><Gesture><Point></Point></Gesture>";
+
+    rapidxml::xml_document<> doc;
+
+    //std::string str = newXml;
+    //std::vector<char> buffer(str.begin(), str.end());
+    //buffer.push_back('\0');
+
+    //doc.parse<0>(&buffer[0]);
+    //vector <pair<double, double>> points = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}};// just trying out 
+    rapidxml::xml_node<>* root_node = doc.allocate_node(node_element,"Gesture");
+    root_node->append_attribute(doc.allocate_attribute("Name",ges.c_str()));
+    root_node->append_attribute(doc.allocate_attribute("Subject", subject.c_str()));
+    //doc.append_node(root_node);
+
+    //rapidxml::xml_node<>* node = root_node->first_node("Point");
+    //xml_node<>* node = ("Point");
+    //iterate/output into xml
+    //points.first = x
+    //points.second = y
+    //vector of points user puts in
+    string x = "";
+    string y = "";
+    
+    for (int i = 0; i < points.size(); i++)
+    {
+       // xml_node<>* point = root_node->first_node("Point");
+        x = to_string(points[i].first);
+        y = to_string(points[i].second);
+        const char* x_node = doc.allocate_string(x.c_str());
+        const char* y_node = doc.allocate_string(y.c_str());
+        char* node_name = doc.allocate_string("Point");
+        xml_node<>* point_node = doc.allocate_node(node_element, "Point");
+        root_node->append_node(point_node);
+        xml_attribute<>* xAtt = doc.allocate_attribute("X", x_node);
+        xml_attribute<>* yAtt = doc.allocate_attribute("Y", y_node);
+        point_node->append_attribute(xAtt);
+        point_node->append_attribute(yAtt);
+        /*point_node->append_attribute(doc.allocate_attribute("X", x.c_str()));
+        point_node->append_attribute(doc.allocate_attribute("Y", y.c_str()));
+        root_node->append_node(point_node);*/
+        //cout << x + "\n" + y << "\n";
+    }
+    doc.append_node(root_node);
+    //std::cout << doc; // lets see it
+    myFile << doc;
+    myFile.close();
+    doc.clear();
 }
 //pair.first is x, pair.second is y
 double DrawPanel::Stroke::distance(pair<double, double> a, pair<double, double> b) {
